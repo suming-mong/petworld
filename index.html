@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>펫케어 - 반려동물 건강 가이드</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tui, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .pet-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .pet-btn {
+            background: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #667eea;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .pet-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .pet-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.25);
+        }
+
+        .card-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 40px;
+            border-radius: 20px;
+            position: relative;
+            animation: slideDown 0.4s ease;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .modal-content h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .info-section {
+            margin-bottom: 25px;
+        }
+
+        .info-section h4 {
+            color: #764ba2;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .info-section li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .pet-btn {
+                padding: 15px 30px;
+            }
+
+            .modal-content {
+                margin: 20px;
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐾 펫케어</h1>
+            <p>우리 아이를 위한 건강 정보 가이드</p>
+        </header>
+
+        <div class="pet-selector">
+            <button class="pet-btn active" data-pet="dog">🐕 강아지</button>
+            <button class="pet-btn" data-pet="cat">🐈 고양이</button>
+            <button class="pet-btn" data-pet="small">🐹 소동물</button>
+        </div>
+
+        <div class="content-grid" id="contentGrid"></div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const petData = {
+            dog: {
+                essential: {
+                    icon: '📚',
+                    title: '필수 지식',
+                    content: {
+                        intro: '강아지를 키우기 전 알아야 할 기본 정보입니다.',
+                        sections: [
+                            {
+                                title: '품종별 특성',
+                                items: [
+                                    '소형견: 말티즈, 푸들 등 - 활발하고 사교적',
+                                    '중형견: 비글, 코카스파니엘 등 - 균형잡힌 성격',
+                                    '대형견: 골든 리트리버, 허스키 등 - 온순하고 활동량 많음'
+                                ]
+                            },
+                            {
+                                title: '기본 케어',
+                                items: [
+                                    '하루 2회 산책 필수',
+                                    '정기적인 목욕 (2-4주 간격)',
+                                    '매일 양치질 또는 치석 관리',
+                                    '월 1회 발톱 관리'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                medical: {
+                    icon: '⚕️',
+                    title: '의학 지식',
+                    content: {
+                        intro: '강아지의 건강을 지키기 위한 의학 정보입니다.',
+                        sections: [
+                            {
+                                title: '필수 예방접종',
+                                items: [
+                                    '종합백신 (DHPPL): 6-8주령부터 시작',
+                                    '광견병: 12주령 이후',
+                                    '켄넬코프: 호흡기 질환 예방',
+                                    '코로나장염: 장 건강 보호'
+                                ]
+                            },
+                            {
+                                title: '정기 검진',
+                                items: [
+                                    '연 1-2회 건강검진',
+                                    '7세 이상: 연 2회 이상 권장',
+                                    '혈액검사, 소변검사, 영상검사 포함'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                disease: {
+                    icon: '🏥',
+                    title: '질병 관리',
+                    content: {
+                        intro: '강아지에게 흔한 질병과 관리 방법입니다.',
+                        sections: [
+                            {
+                                title: '흔한 질병',
+                                items: [
+                                    '슬개골 탈구: 소형견에 흔함, 증상 시 수술 필요',
+                                    '피부병: 알러지, 진드기 등 정기적 관리',
+                                    '치주질환: 양치질로 예방 가능',
+                                    '비만: 식이조절과 운동 필수'
+                                ]
+                            },
+                            {
+                                title: '응급상황 대처',
+                                items: [
+                                    '초콜릿 중독: 즉시 병원 방문',
+                                    '구토/설사: 24시간 이상 지속 시 진료',
+                                    '경련: 발작 시간 기록 후 병원',
+                                    '호흡곤란: 즉시 응급실'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                health: {
+                    icon: '💪',
+                    title: '건강 관리',
+                    content: {
+                        intro: '일상에서 실천하는 건강 관리법입니다.',
+                        sections: [
+                            {
+                                title: '영양 관리',
+                                items: [
+                                    '연령별 적합한 사료 선택',
+                                    '하루 2-3회 규칙적인 급여',
+                                    '체중의 2-3% 급여량 권장',
+                                    '신선한 물 항상 제공'
+                                ]
+                            },
+                            {
+                                title: '운동 관리',
+                                items: [
+                                    '소형견: 하루 30분 이상',
+                                    '중대형견: 하루 1-2시간',
+                                    '나이와 건강상태 고려',
+                                    '여름철 더위 주의'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                behavior: {
+                    icon: '🎯',
+                    title: '행동 특성',
+                    content: {
+                        intro: '강아지의 행동을 이해하고 훈련하는 방법입니다.',
+                        sections: [
+                            {
+                                title: '기본 훈련',
+                                items: [
+                                    '배변 훈련: 일정한 장소와 시간',
+                                    '사회화 훈련: 어릴 때부터 시작',
+                                    '기본 명령어: 앉아, 기다려, 이리와',
+                                    '긍정적 강화 사용'
+                                ]
+                            },
+                            {
+                                title: '문제 행동',
+                                items: [
+                                    '짖음: 원인 파악 후 대응',
+                                    '분리불안: 단계적 훈련',
+                                    '공격성: 전문가 상담 권장',
+                                    '파괴 행동: 충분한 운동과 놀이'
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            cat: {
+                essential: {
+                    icon: '📚',
+                    title: '필수 지식',
+                    content: {
+                        intro: '고양이를 키우기 전 알아야 할 기본 정보입니다.',
+                        sections: [
+                            {
+                                title: '품종별 특성',
+                                items: [
+                                    '단모종: 코리안숏헤어, 아메숏 등 - 관리 용이',
+                                    '장모종: 페르시안, 메인쿤 등 - 빗질 필수',
+                                    '성격: 독립적이지만 애정 표현도 함'
+                                ]
+                            },
+                            {
+                                title: '기본 준비물',
+                                items: [
+                                    '화장실과 모래 (고양이 수+1개)',
+                                    '스크래처 여러 개',
+                                    '급수기와 사료 그릇',
+                                    '캐리어, 장난감'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                medical: {
+                    icon: '⚕️',
+                    title: '의학 지식',
+                    content: {
+                        intro: '고양이의 건강을 지키기 위한 의학 정보입니다.',
+                        sections: [
+                            {
+                                title: '필수 예방접종',
+                                items: [
+                                    '종합백신 (FVRCP): 6-8주령부터',
+                                    '광견병: 12주령 이후',
+                                    '백혈병: 외출 고양이 필수',
+                                    '연 1회 추가 접종'
+                                ]
+                            },
+                            {
+                                title: '중성화 수술',
+                                items: [
+                                    '권장 시기: 6개월 전후',
+                                    '질병 예방 효과',
+                                    '문제 행동 감소',
+                                    '수명 연장 효과'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                disease: {
+                    icon: '🏥',
+                    title: '질병 관리',
+                    content: {
+                        intro: '고양이에게 흔한 질병과 관리 방법입니다.',
+                        sections: [
+                            {
+                                title: '흔한 질병',
+                                items: [
+                                    '방광염/요로결석: 수분 섭취 중요',
+                                    '신부전: 정기 검진으로 조기 발견',
+                                    '구내염: 면역력 관리 필수',
+                                    '헤어볼: 털 관리와 전용 사료'
+                                ]
+                            },
+                            {
+                                title: '위험 신호',
+                                items: [
+                                    '24시간 이상 소변 못 봄 - 응급',
+                                    '구토/설사 반복',
+                                    '식욕 부진 48시간 이상',
+                                    '호흡 이상, 숨소리'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                health: {
+                    icon: '💪',
+                    title: '건강 관리',
+                    content: {
+                        intro: '일상에서 실천하는 건강 관리법입니다.',
+                        sections: [
+                            {
+                                title: '식이 관리',
+                                items: [
+                                    '고단백 육식 동물 - 단백질 중요',
+                                    '습식과 건식 병행 권장',
+                                    '신선한 물 항상 제공 (여러 곳)',
+                                    '사람 음식 절대 금지'
+                                ]
+                            },
+                            {
+                                title: '그루밍',
+                                items: [
+                                    '단모종: 주 1-2회 빗질',
+                                    '장모종: 매일 빗질',
+                                    '발톱 2주마다 관리',
+                                    '치아 건강 체크'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                behavior: {
+                    icon: '🎯',
+                    title: '행동 특성',
+                    content: {
+                        intro: '고양이의 행동을 이해하는 방법입니다.',
+                        sections: [
+                            {
+                                title: '고양이 언어',
+                                items: [
+                                    '꼬리: 곧게 세움-반가움, 흔듦-짜증',
+                                    '귀: 뒤로 젖힘-경계, 공포',
+                                    '그르렁: 만족, 또는 불편함',
+                                    '눈 깜빡임: 애정 표현'
+                                ]
+                            },
+                            {
+                                title: '환경 풍부화',
+                                items: [
+                                    '수직 공간 제공 (캣타워)',
+                                    '창가 자리 마련',
+                                    '다양한 장난감 교체',
+                                    '은신처 여러 개 제공'
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            small: {
+                essential: {
+                    icon: '📚',
+                    title: '필수 지식',
+                    content: {
+                        intro: '소동물을 키우기 전 알아야 할 기본 정보입니다.',
+                        sections: [
+                            {
+                                title: '종류별 특성',
+                                items: [
+                                    '햄스터: 야행성, 단독 생활 선호',
+                                    '토끼: 사회적, 넓은 공간 필요',
+                                    '기니피그: 온순, 무리 생활',
+                                    '페럿: 호기심 많고 활발함'
+                                ]
+                            },
+                            {
+                                title: '기본 환경',
+                                items: [
+                                    '충분한 크기의 케이지',
+                                    '적절한 온도 유지 (18-24도)',
+                                    '은신처와 놀이 공간',
+                                    '깨끗한 물과 신선한 먹이'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                medical: {
+                    icon: '⚕️',
+                    title: '의학 지식',
+                    content: {
+                        intro: '소동물의 건강을 위한 의학 정보입니다.',
+                        sections: [
+                            {
+                                title: '예방 관리',
+                                items: [
+                                    '토끼: 정기 예방접종 필요',
+                                    '페럿: 디스템퍼, 광견병 접종',
+                                    '햄스터/기니피그: 예방접종 불필요',
+                                    '정기 건강검진 권장'
+                                ]
+                            },
+                            {
+                                title: '치과 관리',
+                                items: [
+                                    '설치류는 평생 이가 자람',
+                                    '충분한 씹을거리 제공',
+                                    '부정교합 주의',
+                                    '정기적 치아 체크'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                disease: {
+                    icon: '🏥',
+                    title: '질병 관리',
+                    content: {
+                        intro: '소동물에게 흔한 질병과 관리 방법입니다.',
+                        sections: [
+                            {
+                                title: '흔한 질병',
+                                items: [
+                                    '호흡기 질환: 온도, 습도 관리',
+                                    '설사: 식이 관리 중요',
+                                    '피부병: 청결 유지',
+                                    '비만: 적정 식사량 조절'
+                                ]
+                            },
+                            {
+                                title: '응급 상황',
+                                items: [
+                                    '식욕 부진 12시간 이상',
+                                    '호흡 곤란, 이상 호흡',
+                                    '출혈, 골절',
+                                    '경련, 의식 소실'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                health: {
+                    icon: '💪',
+                    title: '건강 관리',
+                    content: {
+                        intro: '일상에서 실천하는 건강 관리법입니다.',
+                        sections: [
+                            {
+                                title: '종별 식이',
+                                items: [
+                                    '햄스터: 펠렛 + 야채 소량',
+                                    '토끼: 건초 80% + 야채 + 펠렛',
+                                    '기니피그: 건초 + 비타민C 필수',
+                                    '페럿: 고단백 육식 사료'
+                                ]
+                            },
+                            {
+                                title: '환경 관리',
+                                items: [
+                                    '매일 케이지 청소',
+                                    '적절한 온습도 유지',
+                                    '스트레스 최소화',
+                                    '충분한 운동 시간'
+                                ]
+                            }
+                        ]
+                    }
+                },
+                behavior: {
+                    icon: '🎯',
+                    title: '행동 특성',
+                    content: {
+                        intro: '소동물의 행동을 이해하는 방법입니다.',
+                        sections: [
+                            {
+                                title: '스트레스 신호',
+                                items: [
+                                    '과도한 털 고르기',
+                                    '공격성 증가',
+                                    '식욕 감소',
+                                    '움츠러듦, 숨기'
+                                ]
+                            },
+                            {
+                                title: '교감 방법',
+                                items: [
+                                    '천천히 다가가기',
+                                    '간식으로 친해지기',
+                                    '강제로 만지지 않기',
+                                    '조용한 환경 제공'
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        };
+
+        let currentPet = 'dog';
+
+        function renderCards() {
+            const grid = document.getElementById('contentGrid');
+            grid.innerHTML = '';
+            
+            const data = petData[currentPet];
+            
+            Object.keys(data).forEach(key => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => openModal(key);
+                card.innerHTML = `
+                    <div class="card-icon">${data[key].icon}</div>
+                    <h3>${data[key].title}</h3>
+                    <p>${data[key].content.intro}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openModal(category) {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modalContent');
+            const data = petData[currentPet][category].content;
+            
+            let html = `<h2>${petData[currentPet][category].icon} ${petData[currentPet][category].title}</h2>`;
+            html += `<p style="margin-bottom: 20px; color: #666; font-size: 1.1em;">${data.intro}</p>`;
+            
+            data.sections.forEach(section => {
+                html += `
+                    <div class="info-section">
+                        <h4>${section.title}</h4>
+                        <ul>
+                            ${section.items.map(item => `<li>${item}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+            
+            modalContent.innerHTML = html;
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        document.querySelectorAll('.pet-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.pet-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentPet = this.dataset.pet;
+                renderCards();
+            });
+        });
+
+        window.onclick = function(e) {
+            const modal = document.getElementById('modal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        };
+
+        renderCards();
+    </script>
+</body>
+</html>
